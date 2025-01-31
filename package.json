@@ -1,0 +1,20 @@
+{
+  "name": "dinger-merchant-pay",
+  "version": "1.0.0",
+  "description": "Dinger Pay API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Dinger",
+    "Pay",
+    "KBZPay",
+    "AYAPay"
+  ],
+  "author": "Naw Ing",
+  "license": "ISC",
+  "dependencies": {
+    "request-promise": "^4.2.6"
+  }
+}
