@@ -1,7 +1,7 @@
 # Dinger Merchant Pay API 
 
 * If you have any questions, always refer back to the API documentation
-* https://developers.binance.com/docs/binance-pay/introduction
+* https://dinger.asia/developers/eng
 
 ### Installation
 ```shell
@@ -49,7 +49,7 @@ DingerMerchantPay
 ```
 | Param             | Type      | Required      | Description |
 | :---:             | :---:     | :---:         | :---: |
-| providerName      | string    | true          | 'KBZ Pay', 'WAVE PAY' |
+| providerName      | string    | true          | 'KBZ Pay', 'WAVE PAY', 'MPU', 'KBZ Direct Pay', 'Citizens Pay', 'MAB Bank', 'Mytel', 'TrueMoney', 'CB Pay', 'AYA Pay', 'MPitesan', 'Onepay', 'Sai Sai Pay', 'Visa', 'Master', 'MPT Pay' |
 | methodName        | string    | true          | 'PWA', 'QR', 'PIN', 'OTP' |
 | totalAmount       | number    | true          |   |
 | orderId           | string    | true          |   |
