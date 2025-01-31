@@ -4,6 +4,8 @@ const rp = require("request-promise");
 const NodeRSA = require('node-rsa');
 const cryptolib = require("aes-ecb");
 const baseURL = 'https://api.dinger.asia';
+const basePortalUrl = 'https://portal.dinger.asia/gateway';
+const creditPortalUrl = 'https://creditcard-portal.dinger.asia';
 /** */
 module.exports = class DingerPay {
     constructor(
@@ -69,6 +71,79 @@ module.exports = class DingerPay {
             }
         };
         return JSON.parse(await rp(reqOpts))
+    }
+
+    /**
+     * handleVendorResponse
+     * @param {string} providerName 
+     * @param {string} methodName 
+     * @param {*} payResponse 
+     */
+    handleVendorResponse = async (providerName, methodName, payResponse) => {
+        let data = payResponse.response;
+        // Default Redirect
+        // Default Redirect
+        // Default Redirect
+        let flowOperation = "REDIRECT";
+        let redirectLink = `${basePortalUrl}/redirect?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
+        let qrCode = "";
+        // MPU Portal Redirect 
+        if (providerName === "MPU") {
+            redirectLink = `${basePortalUrl}/mpu?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
+        }
+        // Mpitesan Portal Redirect 
+        if (providerName === "MPitesan") {
+            redirectLink = `${basePortalUrl}/mpitesan?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
+        }
+        // CP Pay Portal Redirect 
+        if (providerName === "CB Pay") {
+            redirectLink = `${basePortalUrl}/cbpay?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
+        }
+        // Credit Card
+        if (
+            providerName === "Visa" ||
+            providerName === "Master" ||
+            providerName === "JCB"
+        ) {
+            redirectLink = `${creditPortalUrl}/?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
+        }
+        // KBZ QR Code Base64
+        if (providerName === "KBZ Pay" && methodName === "QR") {
+            qrCode = data.qrCode;
+            flowOperation = "QR";
+            redirectLink = null;
+        }
+        // AYA Pay QR Code Base64
+        if (providerName === "AYA Pay" && methodName === "QR") {
+            qrCode = data.qrCode;
+            flowOperation = "QR";
+            redirectLink = null;
+        }
+        // AYA Pay App Push Notification
+        if (providerName === "AYA Pay" && methodName === "Pin") {
+            flowOperation = "NOTIFICATION";
+            redirectLink = null;
+        }
+        // One Pay App Push Notification
+        if (providerName === "Onepay") {
+            flowOperation = "NOTIFICATION";
+            redirectLink = null;
+        }
+        // Sai Sai Pay App Push Notification
+        if (providerName === "Sai Sai Pay") {
+            flowOperation = "NOTIFICATION";
+            redirectLink = null;
+        }
+        // UAP Pay App Push Notification
+        if (providerName === "UAB Pay") {
+            flowOperation = "NOTIFICATION";
+            redirectLink = null;
+        }
+        return {
+            flowOperation: flowOperation,
+            redirectLink: redirectLink,
+            qrCode: qrCode
+        }
     }
     /**
      * verifyCb
