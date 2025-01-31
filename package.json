@@ -4,7 +4,11 @@
   "description": "Dinger Pay API",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nawing/Dinger-Merchant-Pay-API.git"
   },
   "keywords": [
     "Dinger",
@@ -14,6 +18,10 @@
   ],
   "author": "Naw Ing",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nawing/Dinger-Merchant-Pay-API/issues"
+  },
+  "homepage": "https://github.com/nawing/Dinger-Merchant-Pay-API#readme",
   "dependencies": {
     "request-promise": "^4.2.6"
   }
