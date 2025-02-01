@@ -2,7 +2,9 @@
 
 * If you have any questions, always refer back to the API documentation
 * https://dinger.asia/developers/eng
-* Purpose of this package is because the callback implementation are not very clear 
+* Purpose of this package is 
+* after creating order, the implemation flow could become very messy because of different payment providers has many different ways 
+* and not waste a lot of time for the callback implementation
 
 ### Installation
 ```shell
