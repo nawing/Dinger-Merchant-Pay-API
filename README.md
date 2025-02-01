@@ -8,26 +8,77 @@
 
 ### Installation
 ```shell
-npm install dinger-merchant-pay-api --save
+npm install dinger-merchant-pay-api --sav 
+```
+
+
+#### IDEA
+```node
+
+const express = require("express");
+const bodyParser = require("body-parser");
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+const DingerMerchantPayApi = require("dinger-merchant-pay");
+const DingerMerchantPay = new DingerMerchantPayApi(
+    process.env.DINGER_PROJECT_NAME,
+    process.env.DINGER_MERCHANT_NAME,
+    process.env.DINGER_API_KEY,
+    process.env.DINGER_PUBLIC_KEY,
+    process.env.DINGER_CALLBACK_KEY,
+    process.env.DINGER_ENVIRONMENT
+)
+app.use(bodyParser.json()); 
+
+// Dinger Merchant API create order endpoint
+app.post("/dinger-create-order", async (req, res) => {
+    let validationResponse = await DingerMerchantPay.validatePayload(payload);
+    // Do your before hook here
+    if (validationResponse.pass) {
+        let payResponse = await DingerMerchantPay.pay(payload);
+        // Do your after hook here
+        let flowResponse = await DingerMerchantPay.handleVendorResponse(payload, payResponse);
+        res.json(flowResponse)
+    }
+    if (!validationResponse.pass) {
+        console.log(validationResponse.message);
+        return res.status(401).json({ message: "Validation Failed" });
+    }
+    res.status(200).json({ message: "Success" });
+});
+
+
+// Dinger Merchant API callback endpoint
+app.post("/dinger-callback", async (req, res) => {
+    try {
+        let cbResponse = await DingerMerchantPay.verifyCb(req.body);
+        if (cbResponse.transactionStatus === "SUCCESS") { 
+                    // Do your stuffs
+        }
+        res.status(200).json({ message: "Success" });
+    }.catch(( error ) => {
+        return res.status(403).json({ message: "Unauthorized" });
+    })
+});
+
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+
+
+
 ```
 
 
 #### 1. Creating Instance
 ```node
 const DingerMerchantPayApi = require("dinger-merchant-pay");
-const DINGER_PROJECT_NAME = "";
-const DINGER_MERCHANT_NAME = "";
-const DINGER_API_KEY = "";
-const DINGER_PUBLIC_KEY = "";
-const DINGER_CALLBACK_KEY = "";
-const DINGER_ENVIRONMENT = "";
 const DingerMerchantPay = new DingerMerchantPayApi(
-  DINGER_PROJECT_NAME,
-  DINGER_MERCHANT_NAME,
-  DINGER_API_KEY,
-  DINGER_PUBLIC_KEY,
-  DINGER_CALLBACK_KEY,
-  DINGER_ENVIRONMENT
+    process.env.DINGER_PROJECT_NAME,
+    process.env.DINGER_MERCHANT_NAME,
+    process.env.DINGER_API_KEY,
+    process.env.DINGER_PUBLIC_KEY,
+    process.env.DINGER_CALLBACK_KEY,
+    process.env.DINGER_ENVIRONMENT
 )
 ```
 
@@ -37,24 +88,18 @@ const DingerMerchantPay = new DingerMerchantPayApi(
 // MPU / Visa / Master 
 // There is also no posible way to handle callback in UAT environment
 const DingerMerchantPayApi = require("dinger-merchant-pay");
-const DINGER_PROJECT_NAME = "";
-const DINGER_MERCHANT_NAME = "";
-const DINGER_API_KEY = "";
-const DINGER_PUBLIC_KEY = "";
-const DINGER_CALLBACK_KEY = "";
-const DINGER_ENVIRONMENT = ""; // 'PRODUCTION' | 'UAT'
 const DingerMerchantPay = new DingerMerchantPayApi(
   DINGER_PROJECT_NAME,
   DINGER_MERCHANT_NAME,
   DINGER_API_KEY,
   DINGER_PUBLIC_KEY,
   DINGER_CALLBACK_KEY,
-  DINGER_ENVIRONMENT
+  DINGER_ENVIRONMENT // <<<< 'PRODUCTION' | 'UAT'
 )
 ```
 
 
-#### 3. Creating Order
+#### 3. Creating Order [Pay]
 ```node
 DingerMerchantPay
     .pay({
@@ -137,7 +182,7 @@ res.json(flowResponse)
 | 'NOTIFICATION'    |               | Do nothing |
 
 
-* To sum up there is 3 types of operations you need to implement on your front-end. 
+* To sum up there are 3 types of operations you need to implement on your front-end. 
 * Redirect to link
 * Show QR code to scan on your application 
 * Do nothing. just wait for notification from the payment provider application
@@ -316,16 +361,8 @@ DingerMerchantPay
 ```node
 const express = require("express");
 const bodyParser = require("body-parser");
-const crypto = require("crypto");
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DINGER_PROJECT_NAME = "";
-const DINGER_MERCHANT_NAME = "";
-const DINGER_API_KEY = "";
-const DINGER_PUBLIC_KEY = "";
-const DINGER_CALLBACK_KEY = "";
-const DINGER_ENVIRONMENT = ""; // 'PRODUCTION' | 'UAT'
-
 const DingerMerchantPayApi = require("dinger-merchant-pay");
 const DingerMerchantPay = new DingerMerchantPayApi(
   DINGER_PROJECT_NAME,

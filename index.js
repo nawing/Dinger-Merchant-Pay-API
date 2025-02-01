@@ -1,17 +1,21 @@
 'use strict';
-
+/**
+ * 
+ */
 const rp = require("request-promise");
 const NodeRSA = require('node-rsa');
 const cryptolib = require("aes-ecb");
+
 const baseURL = 'https://api.dinger.asia';
 const portalUrl = 'https://portal.dinger.asia/gateway';
 const creditUrl = 'https://creditcard-portal.dinger.asia';
 
-
 const uatBaseURL = 'https://staging.dinger.asia/payment-gateway-uat';
 const uatPortalUrl = 'https://staging.dinger.asia/gateway';
 const uatCreditUrl = 'https://staging-creditcard-portal.dinger.asia/gateway';
-/** */
+/**
+ * 
+ */
 module.exports = class DingerPay {
     constructor(
         projectName,
@@ -55,61 +59,6 @@ module.exports = class DingerPay {
         return JSON.parse(await rp(reqOpts))
     }
     /**
-     * validatePayload
-     * @param {*} opts 
-     */
-    validatePayload = async (opts) => {
-        let response = { pass: true, message: "" }
-        // Madatory Fields
-        // Madatory Fields
-        // Madatory Fields
-        if (!opts.providerName) { response.pass = false; response.message = "[providerName] is required" }
-        if (!opts.methodName) { response.pass = false; response.message = "[methodName] is required" }
-        if (!opts.totalAmount) { response.pass = false; response.message = "[totalAmount] is required" }
-        if (!opts.orderId) { response.pass = false; response.message = "[orderId] is required" }
-        if (!opts.customerPhone) { response.pass = false; response.message = "[customerPhone] is required" }
-        if (!opts.customerName) { response.pass = false; response.message = "[customerName] is required" }
-        if (!opts.items) { response.pass = false; response.message = "[items] is required" }
-        // Total Amount Matching
-        // Total Amount Matching
-        // Total Amount Matching
-        let totalAmount = 0;
-        for (let item of JSON.parse(opts.items)) {
-            totalAmount += item.amount * item.quantity;
-        }
-        if (opts.totalAmount != totalAmount) {
-            response.pass = false; response.message = "[totalAmount] not matched";
-        }
-        // Cases 1
-        // Cases 1
-        // Cases 1
-        if (
-            opts.providerName === "Visa" ||
-            opts.providerName === "Master" ||
-            opts.providerName === "JCB"
-        ) {
-            if (!opts.email) { response.pass = false; response.message = "[email] is required for Visa, Master, JCB" }
-            if (!opts.state) { response.pass = false; response.message = "[state] is required for Visa, Master, JCB" }
-            if (!opts.country) { response.pass = false; response.message = "[country] is required for Visa, Master, JCB" }
-            if (!opts.postalCode) { response.pass = false; response.message = "[postalCode] is required for Visa, Master, JCB" }
-            if (!opts.billAddress) { response.pass = false; response.message = "[billAddress] is required for Visa, Master, JCB" }
-            if (!opts.billCity) { response.pass = false; response.message = "[billCity] is required for Visa, Master, JCB" }
-        }
-        // Cases 2
-        // Cases 2
-        // Cases 2
-        if (
-            opts.providerName === "Sai Sai Pay" ||
-            opts.providerName === "UAB Pay"
-        ) {
-            let personResponse = await this.queryCheckPerson(opts.customerPhone, opts.projectName);
-            if (personResponse.response.Code !== "000") {
-                response.pass = false; response.message = "[user] is not valid"
-            }
-        }
-        return response
-    }
-    /**
      * pay
      * @param {*} opts 
      * @param {string} providerName
@@ -127,6 +76,41 @@ module.exports = class DingerPay {
      * @returns 
      */
     pay = async (opts) => {
+        let payload = JSON.stringify(opts);
+        let publicKey = new NodeRSA();
+        publicKey.importKey(this.pubKey, 'pkcs8-public')
+        publicKey.setOptions({ encryptionScheme: 'pkcs1' });
+        let token = await this.queryBearerToken();
+        let reqOpts = {
+            method: 'POST',
+            uri: `${this.appBaseUrl}/api/pay`,
+            headers: {
+                Authorization: `Bearer ${token.response.paymentToken}`
+            },
+            form: {
+                payload: publicKey.encrypt(payload, 'base64')
+            }
+        };
+        return JSON.parse(await rp(reqOpts))
+    }
+    /**
+     * charge
+     * @param {*} opts 
+     * @param {string} providerName
+     * @param {string} methodName
+     * @param {number} totalAmount
+     * @param {string} orderId
+     * @param {string} customerPhone
+     * @param {string} customerName
+     * @param {string} description | optional 
+     * @param {string} customerAddress \ optional
+     * @param {Array} items
+     * @param {string} items[].name
+     * @param {string} items[].amount
+     * @param {string} items[].quantity
+     * @returns 
+     */
+    charge = async (opts) => {
         let payload = JSON.stringify(opts);
         let publicKey = new NodeRSA();
         publicKey.importKey(this.pubKey, 'pkcs8-public')
@@ -173,7 +157,25 @@ module.exports = class DingerPay {
         return JSON.parse(await rp(reqOpts))
     }
     /**
+     * verifyCb
+     * @param {*} opts 
+     * @param {*} paymentResult 
+     * @returns 
+     */
+    verifyCb = async (opts) => {
+        return JSON.parse(cryptolib.decrypt(this.cbkKey, opts.paymentResult))
+    }
+    /**
+     * @UNOFFICIAL 
+     * @UNOFFICIAL 
+     * @UNOFFICIAL 
+     * Below this part are my additional contribution to official DINGER API 
+     * These are all very useful functions
+     * 
+     */
+    /**
      * queryAllNameSpace
+     * @returns 
      */
     queryAllNameSpace = async () => {
         return [
@@ -206,6 +208,7 @@ module.exports = class DingerPay {
      * @param {string} opts.methodName 
      * @param {string} opts.providerName 
      * @param {*} payResponse 
+     * @returns 
      */
     handleVendorResponse = async (opts, payResponse) => {
         let data = payResponse.response;
@@ -278,6 +281,7 @@ module.exports = class DingerPay {
      * @param {number} amount 
      * @param {string} vender 
      * @param {string} digital 
+     * @returns 
      */
     orderTransactionFee = async (amount, vender, digital = 'no') => {
         let tx = 0;
@@ -305,12 +309,77 @@ module.exports = class DingerPay {
         return tx;
     }
     /**
-     * verifyCb
+     * pay
      * @param {*} opts 
-     * @param {*} paymentResult 
+     * @param {string} providerName
+     * @param {string} methodName
+     * @param {number} totalAmount
+     * @param {string} orderId
+     * @param {string} customerPhone
+     * @param {string} customerName
+     * @param {string} description 
+     * @param {string} customerAddress
+     * @param {string} email
+     * @param {string} state
+     * @param {string} country
+     * @param {string} postalCode
+     * @param {string} billAddress
+     * @param {string} billCity
+     * @param {Array} items
+     * @param {string} items[].name
+     * @param {string} items[].amount
+     * @param {string} items[].quantity
      * @returns 
      */
-    verifyCb = async (opts) => {
-        return JSON.parse(cryptolib.decrypt(this.cbkKey, opts.paymentResult))
+    validatePayload = async (opts) => {
+        let response = { pass: true, message: "" }
+        // Madatory Fields
+        // Madatory Fields
+        // Madatory Fields
+        if (!opts.providerName) { response.pass = false; response.message = "[providerName] is required" }
+        if (!opts.methodName) { response.pass = false; response.message = "[methodName] is required" }
+        if (!opts.totalAmount) { response.pass = false; response.message = "[totalAmount] is required" }
+        if (!opts.orderId) { response.pass = false; response.message = "[orderId] is required" }
+        if (!opts.customerPhone) { response.pass = false; response.message = "[customerPhone] is required" }
+        if (!opts.customerName) { response.pass = false; response.message = "[customerName] is required" }
+        if (!opts.items) { response.pass = false; response.message = "[items] is required" }
+        // Total Amount Matching
+        // Total Amount Matching
+        // Total Amount Matching
+        let totalAmount = 0;
+        for (let item of JSON.parse(opts.items)) {
+            totalAmount += item.amount * item.quantity;
+        }
+        if (opts.totalAmount != totalAmount) {
+            response.pass = false; response.message = "[totalAmount] not matched";
+        }
+        // Cases 1
+        // Cases 1
+        // Cases 1
+        if (
+            opts.providerName === "Visa" ||
+            opts.providerName === "Master" ||
+            opts.providerName === "JCB"
+        ) {
+            if (!opts.email) { response.pass = false; response.message = "[email] is required for Visa, Master, JCB" }
+            if (!opts.state) { response.pass = false; response.message = "[state] is required for Visa, Master, JCB" }
+            if (!opts.country) { response.pass = false; response.message = "[country] is required for Visa, Master, JCB" }
+            if (!opts.postalCode) { response.pass = false; response.message = "[postalCode] is required for Visa, Master, JCB" }
+            if (!opts.billAddress) { response.pass = false; response.message = "[billAddress] is required for Visa, Master, JCB" }
+            if (!opts.billCity) { response.pass = false; response.message = "[billCity] is required for Visa, Master, JCB" }
+        }
+        // Cases 2
+        // Cases 2
+        // Cases 2
+        if (
+            opts.providerName === "Sai Sai Pay" ||
+            opts.providerName === "UAB Pay"
+        ) {
+            let personResponse = await this.queryCheckPerson(opts.customerPhone, opts.projectName);
+            if (personResponse.response.Code !== "000") {
+                response.pass = false; response.message = "[user] is not valid"
+            }
+        }
+        return response
     }
 }
