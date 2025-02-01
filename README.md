@@ -93,7 +93,6 @@ DingerMerchantPay
 | amount    | string    | true          |  |
 | quantity  | string    | true          |  |
 
-
 #### 4. Handling Create Order Response 
 
 * Please Note: that implementation of different method has different responses. 
@@ -143,13 +142,46 @@ res.json(flowResponse)
 | 'NOTIFICATION'    |               | Do nothing |
 
 
-
 * To sum up there is 3 types of operations you need to implement on your front-end 
 * 1. Redirect to link
 * 2. Show QR code to scan on your application 
-* 3. Do nothing. just wait for notification from the payment provider application 
+* 3. Do nothing. just wait for notification from the payment provider application
 
-#### 4. For Visa / Master / JCB 
+```node
+// This code is for your front end
+// Hopefully this make sense
+import axios from 'axios';
+//const axios = require('axios'); // legacy way
+axios
+    .post('/createOrder', { 
+        'providerName': opts.providerName,
+        'methodName': this.methodName,
+        'totalAmount': opts.totalAmount,
+        'orderId': opts.orderId,
+        'customerPhone': opts.customerPhone,
+        'customerName': opts.customerName,
+        'description': opts.description,
+        'customerAddress': opts.customerAddress,
+        'items': opts.items,
+    })
+    .then( (flowResponse) => {
+        if (flowResponse.flowOperation === "REDIRECT") {
+            // Do A Redriect 
+            window.open(flowResponse.redirectLink)
+        }
+        if (flowResponse.flowOperation === "QR") {
+            // This is base64 string of QR Code
+            // Show this on your application
+            console.log(flowResponse.qrCode)
+        }   
+        if (flowResponse.flowOperation === "NOTIFICATION") {
+            // Do Nothing 
+            // Show Pop Up In your front end Order Created & Wait For Nofication 
+        }
+    })
+```
+
+#### 5. Query Contry Code [Visa / Master / JCB] 
 ```node
 let countryResponse = await DingerMerchantPay.queryCountryCode();
 
@@ -189,9 +221,8 @@ let payResponse = await DingerMerchantPay
 }
 ```
 
-#### 5. Check If Users Is Available
+#### 6. Check If Users Is Available [Sai Sai Pay & UAB Pay]
 ```node
-// This is only for Sai Sai Pay & UAB Pay
 DingerMerchantPay
     .queryCheckPerson('092400000', 'UAB Pay')
     .then((response) => {
@@ -227,7 +258,7 @@ DingerMerchantPay
 }
 ```
 
-#### 6. Get All Namespaces
+#### 7. Get All Namespaces
 ```node
 // This is only for Sai Sai Pay & UAB Pay
 DingerMerchantPay
@@ -240,44 +271,9 @@ DingerMerchantPay
     })
 ```
 
-#### 7. Front End Code
-
-```node
-// This code is for your front end
-// Hopefully this make sense
-import axios from 'axios';
-//const axios = require('axios'); // legacy way
-axios
-    .post('/createOrder', { 
-        'providerName': opts.providerName,
-        'methodName': this.methodName,
-        'totalAmount': opts.totalAmount,
-        'orderId': opts.orderId,
-        'customerPhone': opts.customerPhone,
-        'customerName': opts.customerName,
-        'description': opts.description,
-        'customerAddress': opts.customerAddress,
-        'items': opts.items,
-    })
-    .then( (flowResponse) => {
-        if (flowResponse.flowOperation === "REDIRECT") {
-            // Do A Redriect 
-            window.open(flowResponse.redirectLink)
-        }
-        if (flowResponse.flowOperation === "QR") {
-            // This is base64 string of QR Code
-            // Show this on your application
-            console.log(flowResponse.qrCode)
-        }   
-        if (flowResponse.flowOperation === "NOTIFICATION") {
-            // Do Nothing 
-            // Show Pop Up In your front end Order Created & Wait For Nofication 
-        }
-    })
-```
 
 
-#### 5. Callback Handling
+#### 8. Callback Handling
 ```node
 const express = require("express");
 const bodyParser = require("body-parser");
