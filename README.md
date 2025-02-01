@@ -79,7 +79,8 @@ DingerMerchantPay
 * MPU, Visa, Master responds >>[portal] redirect link (weird behaviour)
 
 ```node
-// I created a clean way to handle a lot of responses
+// I created a clean way to handle many different type of responses in 3 simple way.
+
 let payResponse = await DingerMerchantPay
     .pay({
         'providerName': opts.providerName,
@@ -87,10 +88,10 @@ let payResponse = await DingerMerchantPay
         'totalAmount': opts.totalAmount,
         'orderId': opts.orderId,
         'customerPhone': opts.customerPhone,
-        "customerName": opts.customerName,
-        "description": opts.description,
-        "customerAddress": opts.customerAddress,
-        "items": opts.items,
+        'customerName': opts.customerName,
+        'description': opts.description,
+        'customerAddress': opts.customerAddress,
+        'items': opts.items,
     });
 
 let flowResponse = await DingerMerchantPay
@@ -100,7 +101,6 @@ let flowResponse = await DingerMerchantPay
         payResponse,
     )
 console.log(flowResponse)
-
 // {
 //      flowOperation: '', << String 'REDIRECT' | 'QR' | 'NOTIFICATION'
 //      redirectLink: '', << Redirect Link
@@ -109,35 +109,59 @@ console.log(flowResponse)
 
 // you can respond directly to Front End
 res.json(flowResponse)
+```
+
+| flowOperation     | Key           | Description |
+| :---:             | :---:         |  :---: |
+| 'REDIRECT'        | redirectLink  | open the link on your UI |
+| 'QR'              | qrCode        | show QR code in your application |
+| 'NOTIFICATION'    |               | Do nothing |
 
 
-// To sum up there is 3 types of operations you need to implement on your front-end 
-// 1. Redirect to link
-// 2. Show QR code to scan on your application 
-// 3. Do nothing. just wait for notification from the payment prodicder application 
 
+* To sum up there is 3 types of operations you need to implement on your front-end 
+* 1. Redirect to link
+* 2. Show QR code to scan on your application 
+* 3. Do nothing. just wait for notification from the payment provider application 
 
-if (flowResponse.flowOperation === "REDIRECT") {
-    // Do A Redriect 
-    window.open(flowResponse.redirectLink)
-}
+#### 4. Front End Code
 
-if (flowResponse.flowOperation === "QR") {
-    // This is base64 string of QR Code
-    // Show this on your application
-    console.log(flowResponse.qrCode)
-}   
-
-if (flowResponse.flowOperation === "NOTIFICATION") {
-    // Do Nothing 
-    // Show Pop Up In your front end Order Created & Wait For Nofication 
-}
-
-
+```node
+// This code is for your front end
+// Hopefully this make sense
+import axios from 'axios';
+//const axios = require('axios'); // legacy way
+axios
+    .post('/createOrder', { 
+        'providerName': opts.providerName,
+        'methodName': this.methodName,
+        'totalAmount': opts.totalAmount,
+        'orderId': opts.orderId,
+        'customerPhone': opts.customerPhone,
+        'customerName': opts.customerName,
+        'description': opts.description,
+        'customerAddress': opts.customerAddress,
+        'items': opts.items,
+    })
+    .then( (flowResponse) => {
+        if (flowResponse.flowOperation === "REDIRECT") {
+            // Do A Redriect 
+            window.open(flowResponse.redirectLink)
+        }
+        if (flowResponse.flowOperation === "QR") {
+            // This is base64 string of QR Code
+            // Show this on your application
+            console.log(flowResponse.qrCode)
+        }   
+        if (flowResponse.flowOperation === "NOTIFICATION") {
+            // Do Nothing 
+            // Show Pop Up In your front end Order Created & Wait For Nofication 
+        }
+    })
 ```
 
 
-### Callback Handling
+#### 5. Callback Handling
 ```node
 const express = require("express");
 const bodyParser = require("body-parser");
