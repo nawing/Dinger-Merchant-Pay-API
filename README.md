@@ -170,8 +170,8 @@ let payResponse = await DingerMerchantPay
         "items" : "[{‘name':'Mac','amount':'1100','quantity':'2'}]" 
     });
 ```
+###### [Response] Country Code
 ```json
-// Country Code Response
 {
   "code": "000",
   "message": "Request Success",
@@ -191,6 +191,7 @@ let payResponse = await DingerMerchantPay
 
 #### 5. Check If Users Is Available
 ```node
+// This is only for Sai Sai Pay & UAB Pay
 DingerMerchantPay
     .queryCheckPerson('092400000', 'UAB Pay')
     .then((response) => {
@@ -201,8 +202,8 @@ DingerMerchantPay
     })
 ```
 
+###### [Response] Valid User Found
 ```json
-// Valid User Found
 {
     "code": "000",
     "message": "Request Success",
@@ -213,8 +214,8 @@ DingerMerchantPay
     }
 }
 ```
+###### [Response] Valid User Not Found
 ```json
-// User Not Found
 {
     "code": "000",
     "message": "Request Success",
@@ -224,6 +225,19 @@ DingerMerchantPay
         "Message": "Invalid Wallet User"
     }
 }
+```
+
+#### 6. Get All Namespaces
+```node
+// This is only for Sai Sai Pay & UAB Pay
+DingerMerchantPay
+    .queryAllNameSpace()
+    .then((response) => {
+        console.log(response)
+    })
+    .catch((error) => {
+        console.log(error)
+    })
 ```
 
 #### 7. Front End Code

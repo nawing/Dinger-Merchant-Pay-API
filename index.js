@@ -118,6 +118,33 @@ module.exports = class DingerPay {
         return JSON.parse(await rp(reqOpts))
     }
     /**
+     * queryAllNameSpace
+     */
+    queryAllNameSpace = async () => {
+        return [
+            { providerName: "KBZ Pay", methodName: "QR", flow: "QR", logo: "" },
+            { providerName: "KBZ Pay", methodName: "PWA", flow: "REDIRECT", logo: "" },
+            { providerName: "AYA Pay", methodName: "QR", flow: "QR", logo: "" },
+            { providerName: "AYA Pay", methodName: "PIN", flow: "NOTIFICATION", logo: "" },
+            { providerName: "Citizens Pay", methodName: "PIN", flow: "REDIRECT", logo: "" },
+            { providerName: "Wave Pay", methodName: "PIN", flow: "REDIRECT", logo: "" },
+            { providerName: "MPU", methodName: "OTP", flow: "REDIRECT", logo: "" },
+            { providerName: "Mytel", methodName: "PIN", flow: "REDIRECT", logo: "" },
+            { providerName: "Sai Sai Pay", methodName: "PIN", flow: "NOTIFICATION", logo: "" },
+            { providerName: "Onepay", methodName: "PIN", flow: "NOTIFICATION", logo: "" },
+            { providerName: "MPitesan", methodName: "PIN", flow: "REDIRECT", logo: "" },
+            { providerName: "KBZ Direct Pay", methodName: "PWA", flow: "REDIRECT", logo: "" },
+            { providerName: "Visa", methodName: "OTP", flow: "REDIRECT", logo: "" },
+            { providerName: "Master", methodName: "OTP", flow: "REDIRECT", logo: "" },
+            { providerName: "MPU", methodName: "OTP", flow: "REDIRECT", logo: "" },
+            { providerName: "CB Pay", methodName: "QR", flow: "REDIRECT", logo: "" },
+            { providerName: "MAB Bank", methodName: "OTP", flow: "REDIRECT", logo: "" },
+            { providerName: "MPT Pay", methodName: "PIN", flow: "REDIRECT", logo: "" },
+            // { providerName: "OK Dollar", methodName: "PIN", flow: "REDIRECT", logo: "" },
+            { providerName: "UAB Pay", methodName: "PIN", flow: "NOTIFICATION", logo: "" },
+        ]
+    }
+    /**
      * handleVendorResponse
      * @param {string} providerName 
      * @param {string} methodName 
