@@ -4,8 +4,13 @@ const rp = require("request-promise");
 const NodeRSA = require('node-rsa');
 const cryptolib = require("aes-ecb");
 const baseURL = 'https://api.dinger.asia';
-const basePortalUrl = 'https://portal.dinger.asia/gateway';
-const creditPortalUrl = 'https://creditcard-portal.dinger.asia';
+const portalUrl = 'https://portal.dinger.asia/gateway';
+const creditUrl = 'https://creditcard-portal.dinger.asia';
+
+
+const uatBaseURL = 'https://staging.dinger.asia/payment-gateway-uat';
+const uatPortalUrl = 'https://staging.dinger.asia/gateway';
+const uatCreditUrl = 'https://staging-creditcard-portal.dinger.asia/gateway';
 /** */
 module.exports = class DingerPay {
     constructor(
@@ -14,12 +19,24 @@ module.exports = class DingerPay {
         apiKey,
         pubKey,
         cbkKey,
+        environment,
     ) {
         this.projectName = projectName;
         this.merchantName = merchantName;
         this.apiKey = apiKey;
         this.pubKey = pubKey;
         this.cbkKey = cbkKey;
+        this.environment = environment;
+        if (this.environment === "PRODUCTION") {
+            this.appBaseUrl = baseURL;
+            this.appPortalUrl = portalUrl;
+            this.appCreditUrl = creditUrl;
+        }
+        if (this.environment === "UAT") {
+            this.appBaseUrl = uatBaseURL;
+            this.appPortalUrl = uatPortalUrl;
+            this.appCreditUrl = uatCreditUrl;
+        }
     }
     /**
      * tokenize
@@ -28,7 +45,7 @@ module.exports = class DingerPay {
     tokenize = async () => {
         let reqOpts = {
             method: 'GET',
-            uri: `${baseURL}/api/token`,
+            uri: `${this.appBaseUrl}/api/token`,
             qs: {
                 projectName: this.projectName,
                 merchantName: this.merchantName,
@@ -62,7 +79,7 @@ module.exports = class DingerPay {
         let token = await this.tokenize();
         let reqOpts = {
             method: 'POST',
-            uri: `${baseURL}/api/pay`,
+            uri: `${this.appBaseUrl}/api/pay`,
             headers: {
                 Authorization: `Bearer ${token.response.paymentToken}`
             },
@@ -85,19 +102,19 @@ module.exports = class DingerPay {
         // Default Redirect
         // Default Redirect
         let flowOperation = "REDIRECT";
-        let redirectLink = `${basePortalUrl}/redirect?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
+        let redirectLink = `${this.appPortalUrl}/redirect?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
         let qrCode = "";
         // MPU Portal Redirect 
         if (providerName === "MPU") {
-            redirectLink = `${basePortalUrl}/mpu?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
+            redirectLink = `${this.appPortalUrl}/mpu?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
         }
         // Mpitesan Portal Redirect 
         if (providerName === "MPitesan") {
-            redirectLink = `${basePortalUrl}/mpitesan?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
+            redirectLink = `${this.appPortalUrl}/mpitesan?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
         }
         // CP Pay Portal Redirect 
         if (providerName === "CB Pay") {
-            redirectLink = `${basePortalUrl}/cbpay?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
+            redirectLink = `${this.appPortalUrl}/cbpay?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
         }
         // Credit Card
         if (
@@ -105,7 +122,7 @@ module.exports = class DingerPay {
             providerName === "Master" ||
             providerName === "JCB"
         ) {
-            redirectLink = `${creditPortalUrl}/?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
+            redirectLink = `${this.appCreditUrl}/?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
         }
         // KBZ QR Code Base64
         if (providerName === "KBZ Pay" && methodName === "QR") {

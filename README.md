@@ -9,7 +9,6 @@
 npm install dinger-merchant-pay-api
 ```
 
-### Basic Operations
 
 #### 1. Creating Instance
 ```node
@@ -19,12 +18,36 @@ const DINGER_MERCHANT_NAME = "";
 const DINGER_API_KEY = "";
 const DINGER_PUBLIC_KEY = "";
 const DINGER_CALLBACK_KEY = "";
+const DINGER_ENVIRONMENT = "";
 const DingerMerchantPay = new DingerMerchantPayApi(
   DINGER_PROJECT_NAME,
   DINGER_MERCHANT_NAME,
   DINGER_API_KEY,
   DINGER_PUBLIC_KEY,
   DINGER_CALLBACK_KEY,
+  DINGER_ENVIRONMENT
+)
+```
+
+#### Switching Environment 
+```node
+// Please Note: Dinger does not provide UAT environment for credit cards 
+// MPU / Visa / Master 
+// There is also no posible way to handle callback in UAT environment
+const DingerMerchantPayApi = require("dinger-merchant-pay");
+const DINGER_PROJECT_NAME = "";
+const DINGER_MERCHANT_NAME = "";
+const DINGER_API_KEY = "";
+const DINGER_PUBLIC_KEY = "";
+const DINGER_CALLBACK_KEY = "";
+const DINGER_ENVIRONMENT = ""; // 'PRODUCTION' | 'UAT'
+const DingerMerchantPay = new DingerMerchantPayApi(
+  DINGER_PROJECT_NAME,
+  DINGER_MERCHANT_NAME,
+  DINGER_API_KEY,
+  DINGER_PUBLIC_KEY,
+  DINGER_CALLBACK_KEY,
+  DINGER_ENVIRONMENT
 )
 ```
 
