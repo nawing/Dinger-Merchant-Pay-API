@@ -151,14 +151,42 @@ res.json(flowResponse)
 
 #### 4. For Visa / Master / JCB 
 ```node
-DingerMerchantPay
-    .queryCountryCode()
-    .then((response) => {
-        console.log(response)
-    })
-    .catch((error) => {
-        console.log(error)
-    })
+let countryResponse = await DingerMerchantPay.queryCountryCode();
+
+let payResponse = await DingerMerchantPay
+    .pay({
+        "providerName": "AYA Pay", 
+        "methodName": "QR", 
+        "totalAmount" : 2200, 
+        "orderId":  "11111", 
+        "email": "info@gmail.com",
+        "customerPhone" : "09787747310", 
+        "customerName" : "test user name", 
+        "state" : "customer state",
+        "country" : "customer country", ** Must add 'code' value from Country Code List Enquiry API(/countryCodeListEnquiry) from Dinger **
+        "postalCode" : "customer postal code",
+        "billAddress" : "customer address",
+        "billCity" : "customer city",
+        "items" : "[{‘name':'Mac','amount':'1100','quantity':'2'}]" 
+    });
+```
+```json
+// Country Code Response
+{
+  "code": "000",
+  "message": "Request Success",
+  "time": "20250201 084550",
+  "response": [
+    {
+      "country": "Afghanistan",
+      "code": "AF"
+    },
+    {
+      "country": "Aland Islands",
+      "code": "AX"
+    },
+  ]
+}
 ```
 
 #### 5. Check If Users Is Available
@@ -171,6 +199,31 @@ DingerMerchantPay
     .catch((error) => {
         console.log(error)
     })
+```
+
+```json
+// Valid User Found
+{
+    "code": "000",
+    "message": "Request Success",
+    "time": "20221227 165655",
+    "response": {
+        "Code": "000",
+        "Message": "Success"
+    }
+}
+```
+```json
+// User Not Found
+{
+    "code": "000",
+    "message": "Request Success",
+    "time": "20221227 165755",
+    "response": {
+        "Code": "021",
+        "Message": "Invalid Wallet User"
+    }
+}
 ```
 
 #### 7. Front End Code
