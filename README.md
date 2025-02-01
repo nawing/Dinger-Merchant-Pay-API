@@ -260,7 +260,7 @@ DingerMerchantPay
 
 #### 7. Get All Namespaces
 ```node
-// This is only for Sai Sai Pay & UAB Pay
+// This is not offical. I created in this package because this list is very useful.
 DingerMerchantPay
     .queryAllNameSpace()
     .then((response) => {
