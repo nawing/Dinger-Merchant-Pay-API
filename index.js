@@ -39,10 +39,10 @@ module.exports = class DingerPay {
         }
     }
     /**
-     * tokenize
+     * queryBearerToken
      * @returns 
      */
-    tokenize = async () => {
+    queryBearerToken = async () => {
         let reqOpts = {
             method: 'GET',
             uri: `${this.appBaseUrl}/api/token`,
@@ -53,6 +53,61 @@ module.exports = class DingerPay {
             }
         };
         return JSON.parse(await rp(reqOpts))
+    }
+    /**
+     * validatePayload
+     * @param {*} opts 
+     */
+    validatePayload = async (opts) => {
+        let response = { pass: true, message: "" }
+        // Madatory Fields
+        // Madatory Fields
+        // Madatory Fields
+        if (!opts.providerName) { response.pass = false; response.message = "[providerName] is required" }
+        if (!opts.methodName) { response.pass = false; response.message = "[methodName] is required" }
+        if (!opts.totalAmount) { response.pass = false; response.message = "[totalAmount] is required" }
+        if (!opts.orderId) { response.pass = false; response.message = "[orderId] is required" }
+        if (!opts.customerPhone) { response.pass = false; response.message = "[customerPhone] is required" }
+        if (!opts.customerName) { response.pass = false; response.message = "[customerName] is required" }
+        if (!opts.items) { response.pass = false; response.message = "[items] is required" }
+        // Total Amount Matching
+        // Total Amount Matching
+        // Total Amount Matching
+        let totalAmount = 0;
+        for (let item of JSON.parse(opts.items)) {
+            totalAmount += item.amount * item.quantity;
+        }
+        if (opts.totalAmount != totalAmount) {
+            response.pass = false; response.message = "[totalAmount] not matched";
+        }
+        // Cases 1
+        // Cases 1
+        // Cases 1
+        if (
+            opts.providerName === "Visa" ||
+            opts.providerName === "Master" ||
+            opts.providerName === "JCB"
+        ) {
+            if (!opts.email) { response.pass = false; response.message = "[email] is required for Visa, Master, JCB" }
+            if (!opts.state) { response.pass = false; response.message = "[state] is required for Visa, Master, JCB" }
+            if (!opts.country) { response.pass = false; response.message = "[country] is required for Visa, Master, JCB" }
+            if (!opts.postalCode) { response.pass = false; response.message = "[postalCode] is required for Visa, Master, JCB" }
+            if (!opts.billAddress) { response.pass = false; response.message = "[billAddress] is required for Visa, Master, JCB" }
+            if (!opts.billCity) { response.pass = false; response.message = "[billCity] is required for Visa, Master, JCB" }
+        }
+        // Cases 2
+        // Cases 2
+        // Cases 2
+        if (
+            opts.providerName === "Sai Sai Pay" ||
+            opts.providerName === "UAB Pay"
+        ) {
+            let personResponse = await this.queryCheckPerson(opts.customerPhone, opts.projectName);
+            if (personResponse.response.Code !== "000") {
+                response.pass = false; response.message = "[user] is not valid"
+            }
+        }
+        return response
     }
     /**
      * pay
@@ -76,7 +131,7 @@ module.exports = class DingerPay {
         let publicKey = new NodeRSA();
         publicKey.importKey(this.pubKey, 'pkcs8-public')
         publicKey.setOptions({ encryptionScheme: 'pkcs1' });
-        let token = await this.tokenize();
+        let token = await this.queryBearerToken();
         let reqOpts = {
             method: 'POST',
             uri: `${this.appBaseUrl}/api/pay`,
@@ -98,7 +153,7 @@ module.exports = class DingerPay {
     queryCheckPerson = async (phoneNumber, appName) => {
         let reqOpts = {
             method: 'GET',
-            uri: `${this.appBaseUrl}/api/checkPhone`,
+            uri: `${this.appBaseUrl}/checkPhone`,
             qs: {
                 phoneNumber: phoneNumber,
                 appName: appName,
@@ -140,17 +195,19 @@ module.exports = class DingerPay {
             { providerName: "CB Pay", methodName: "QR", flow: "REDIRECT", logo: "" },
             { providerName: "MAB Bank", methodName: "OTP", flow: "REDIRECT", logo: "" },
             { providerName: "MPT Pay", methodName: "PIN", flow: "REDIRECT", logo: "" },
-            // { providerName: "OK Dollar", methodName: "PIN", flow: "REDIRECT", logo: "" },
+            { providerName: "OK Dollar", methodName: "PIN", flow: "REDIRECT", logo: "" },
             { providerName: "UAB Pay", methodName: "PIN", flow: "NOTIFICATION", logo: "" },
+            { providerName: "TrueMoney", methodName: "PIN", flow: "NOTIFICATION", logo: "" },
         ]
     }
     /**
      * handleVendorResponse
-     * @param {string} providerName 
-     * @param {string} methodName 
+     * @param {*} opts 
+     * @param {string} opts.methodName 
+     * @param {string} opts.providerName 
      * @param {*} payResponse 
      */
-    handleVendorResponse = async (providerName, methodName, payResponse) => {
+    handleVendorResponse = async (opts, payResponse) => {
         let data = payResponse.response;
         // Default Redirect
         // Default Redirect
@@ -159,54 +216,54 @@ module.exports = class DingerPay {
         let redirectLink = `${this.appPortalUrl}/redirect?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
         let qrCode = "";
         // MPU Portal Redirect 
-        if (providerName === "MPU") {
+        if (opts.providerName === "MPU") {
             redirectLink = `${this.appPortalUrl}/mpu?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
         }
         // Mpitesan Portal Redirect 
-        if (providerName === "MPitesan") {
+        if (opts.providerName === "MPitesan") {
             redirectLink = `${this.appPortalUrl}/mpitesan?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
         }
         // CP Pay Portal Redirect 
-        if (providerName === "CB Pay") {
+        if (opts.providerName === "CB Pay") {
             redirectLink = `${this.appPortalUrl}/cbpay?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
         }
         // Credit Card
         if (
-            providerName === "Visa" ||
-            providerName === "Master" ||
-            providerName === "JCB"
+            opts.providerName === "Visa" ||
+            opts.providerName === "Master" ||
+            opts.providerName === "JCB"
         ) {
             redirectLink = `${this.appCreditUrl}/?transactionNo=${data.transactionNum}&formToken=${data.formToken}&merchantOrderId=${data.merchOrderId}`;
         }
         // KBZ QR Code Base64
-        if (providerName === "KBZ Pay" && methodName === "QR") {
+        if (opts.providerName === "KBZ Pay" && opts.methodName === "QR") {
             qrCode = data.qrCode;
             flowOperation = "QR";
             redirectLink = null;
         }
         // AYA Pay QR Code Base64
-        if (providerName === "AYA Pay" && methodName === "QR") {
+        if (opts.providerName === "AYA Pay" && opts.methodName === "QR") {
             qrCode = data.qrCode;
             flowOperation = "QR";
             redirectLink = null;
         }
         // AYA Pay App Push Notification
-        if (providerName === "AYA Pay" && methodName === "PIN") {
+        if (opts.providerName === "AYA Pay" && opts.methodName === "PIN") {
             flowOperation = "NOTIFICATION";
             redirectLink = null;
         }
         // One Pay App Push Notification
-        if (providerName === "Onepay") {
+        if (opts.providerName === "Onepay") {
             flowOperation = "NOTIFICATION";
             redirectLink = null;
         }
         // Sai Sai Pay App Push Notification
-        if (providerName === "Sai Sai Pay") {
+        if (opts.providerName === "Sai Sai Pay") {
             flowOperation = "NOTIFICATION";
             redirectLink = null;
         }
         // UAP Pay App Push Notification
-        if (providerName === "UAB Pay") {
+        if (opts.providerName === "UAB Pay") {
             flowOperation = "NOTIFICATION";
             redirectLink = null;
         }
@@ -215,6 +272,37 @@ module.exports = class DingerPay {
             redirectLink: redirectLink,
             qrCode: qrCode
         }
+    }
+    /**
+     * orderTransactionFee
+     * @param {number} amount 
+     * @param {string} vender 
+     * @param {string} digital 
+     */
+    orderTransactionFee = async (amount, vender, digital = 'no') => {
+        let tx = 0;
+        switch (vender) {
+            case "KBZ Direct Pay": (digital === 'yes') ? tx = amount * 0.15 : tx = amount * 0.019; break;
+            case "KBZ Pay": (digital === 'yes') ? tx = amount * 0.15 : tx = amount * 0.019; break;
+            case "Citizens Pay": tx = amount * 0.019; break;
+            case "WAVE Pay": tx = amount * 0.034; break;
+            case "TrueMoney": tx = (amount * 0.004) + 200; break;
+            case "Mytel Pay": tx = amount * 0.02; break;
+            case "AYA Pay": tx = amount * 0.007; break
+            case "MPU": tx = (amount * 0.008) + 200; break;
+            case "UAB Pay": tx = amount * 0.009; break;
+            case "Sai Sai Pay": tx = amount * 0.009; break;
+            case "MPitesan": tx = amount * 0.019; break;
+            case "Onepay": tx = amount * 0.016; break;
+            case "Visa": tx = amount * 0.039; break;
+            case "Master": tx = amount * 0.039; break;
+            case "JCB": tx = amount * 0.039; break;
+            case "CB Pay": tx = amount * 0.015; break;
+            case "MAB Bank": (amount < 200000) ? tx = 1200 : tx = amount * 0.01; break;
+            case "MPT Pay": tx = amount * 0.015; break;
+            case "OK Dollar": tx = amount * 0.004; break;
+        }
+        return tx;
     }
     /**
      * verifyCb

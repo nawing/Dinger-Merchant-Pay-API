@@ -104,26 +104,21 @@ DingerMerchantPay
 
 ```node
 // I created a clean way to handle many different type of responses in 3 simple way.
+let payload = {
+    'providerName': opts.providerName,
+    'methodName': this.methodName,
+    'totalAmount': opts.totalAmount,
+    'orderId': opts.orderId,
+    'customerPhone': opts.customerPhone,
+    'customerName': opts.customerName,
+    'description': opts.description,
+    'customerAddress': opts.customerAddress,
+    'items': opts.items,
+}
 
-let payResponse = await DingerMerchantPay
-    .pay({
-        'providerName': opts.providerName,
-        'methodName': this.methodName,
-        'totalAmount': opts.totalAmount,
-        'orderId': opts.orderId,
-        'customerPhone': opts.customerPhone,
-        'customerName': opts.customerName,
-        'description': opts.description,
-        'customerAddress': opts.customerAddress,
-        'items': opts.items,
-    });
+let payResponse = await DingerMerchantPay.pay(payload);
+let flowResponse = await DingerMerchantPay.handleVendorResponse(payload, payResponse);
 
-let flowResponse = await DingerMerchantPay
-    .handleVendorResponse(
-        opts.providerName,
-        opts.methodName,
-        payResponse,
-    )
 console.log(flowResponse)
 // {
 //      flowOperation: '', << String 'REDIRECT' | 'QR' | 'NOTIFICATION'
@@ -271,9 +266,53 @@ DingerMerchantPay
     })
 ```
 
+#### 8. Validating Request Order 
+```node
+// This is validating Logics
+let payload = {
+        "providerName": "Visa", 
+        "methodName": "OTP", 
+        "totalAmount" : 2200, 
+        "orderId":  "11111", 
+        "email": "info@gmail.com",
+        "customerPhone" : "09787747310", 
+        "customerName" : "test user name", 
+        "state" : "customer state",
+        "country" : "customer country", 
+        "postalCode" : "customer postal code",
+        "billAddress" : "customer address",
+        "billCity" : "customer city",
+        "items" : "[{‘name':'Mac','amount':'1100','quantity':'2'}]" 
+}
+
+// Putting Everything Together 
+
+let validationResponse = await DingerMerchantPay.validatePayload(payload);
+if (validationResponse.pass) {
+    let payResponse = await DingerMerchantPay.pay(payload);
+    let flowResponse = await DingerMerchantPay.handleVendorResponse(payload, payResponse);
+    res.json(flowResponse)
+}
+if (!validationResponse.pass) {
+    console.log(validationResponse.message)
+}
+```
 
 
-#### 8. Callback Handling
+#### 9. Transaction Fee Calculation
+```node
+// @param {number} amount
+// @param {string} vender
+// @param {string} digital [yes|no] <<< KBZ Pay, KBZ M Banking takes (15% for virtual goods) (1.9% for non-virtual) >>>
+DingerMerchantPay
+    .orderTransactionFee(5000, 'KBZ Pay', 'yes')
+    .then(( txFee ) => {
+        console.log(txFee)
+    })
+```
+
+
+#### 10. Callback Handling
 ```node
 const express = require("express");
 const bodyParser = require("body-parser");
