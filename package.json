@@ -1,6 +1,6 @@
 {
   "name": "dinger-merchant-pay-api",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Dinger Merchant Pay API",
   "main": "index.js",
   "scripts": {

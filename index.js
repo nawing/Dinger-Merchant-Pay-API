@@ -94,41 +94,6 @@ module.exports = class DingerPay {
         return JSON.parse(await rp(reqOpts))
     }
     /**
-     * charge
-     * @param {*} opts 
-     * @param {string} providerName
-     * @param {string} methodName
-     * @param {number} totalAmount
-     * @param {string} orderId
-     * @param {string} customerPhone
-     * @param {string} customerName
-     * @param {string} description | optional 
-     * @param {string} customerAddress \ optional
-     * @param {Array} items
-     * @param {string} items[].name
-     * @param {string} items[].amount
-     * @param {string} items[].quantity
-     * @returns 
-     */
-    charge = async (opts) => {
-        let payload = JSON.stringify(opts);
-        let publicKey = new NodeRSA();
-        publicKey.importKey(this.pubKey, 'pkcs8-public')
-        publicKey.setOptions({ encryptionScheme: 'pkcs1' });
-        let token = await this.queryBearerToken();
-        let reqOpts = {
-            method: 'POST',
-            uri: `${this.appBaseUrl}/api/pay`,
-            headers: {
-                Authorization: `Bearer ${token.response.paymentToken}`
-            },
-            form: {
-                payload: publicKey.encrypt(payload, 'base64')
-            }
-        };
-        return JSON.parse(await rp(reqOpts))
-    }
-    /**
      * queryCheckPerson
      * @param {string} phoneNumber 
      * @param {string} appName 

@@ -8,7 +8,7 @@
 
 ### Installation
 ```shell
-npm install dinger-merchant-pay-api --sav 
+npm install dinger-merchant-pay-api --save
 ```
 
 
