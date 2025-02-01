@@ -8,7 +8,7 @@
 
 ### Installation
 ```shell
-npm install dinger-merchant-pay-api
+npm install dinger-merchant-pay-api --save
 ```
 
 
@@ -193,18 +193,21 @@ const bodyParser = require("body-parser");
 const crypto = require("crypto");
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DingerMerchantPayApi = require("dinger-merchant-pay");
 const DINGER_PROJECT_NAME = "";
 const DINGER_MERCHANT_NAME = "";
 const DINGER_API_KEY = "";
 const DINGER_PUBLIC_KEY = "";
 const DINGER_CALLBACK_KEY = "";
+const DINGER_ENVIRONMENT = ""; // 'PRODUCTION' | 'UAT'
+
+const DingerMerchantPayApi = require("dinger-merchant-pay");
 const DingerMerchantPay = new DingerMerchantPayApi(
   DINGER_PROJECT_NAME,
   DINGER_MERCHANT_NAME,
   DINGER_API_KEY,
   DINGER_PUBLIC_KEY,
   DINGER_CALLBACK_KEY,
+  DINGER_ENVIRONMENT
 )
 app.use(bodyParser.json()); 
 // Dinger Merchant API callback endpoint
@@ -227,6 +230,6 @@ app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
 
 ### Summary
 * If there are any issue, please feel free to contribute and contact me nawingngan@gmail.com
-* If you find this package useful, please buy me a coffee. 
+* If you find this package useful, please buy me a cup of coffee. 
 
 <img src="https://i.imgur.com/xx04ANu.png" width="180">
