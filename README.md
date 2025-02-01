@@ -31,7 +31,7 @@ const DingerMerchantPay = new DingerMerchantPayApi(
 )
 ```
 
-#### Switching Environment 
+#### 2. Switching Environment 
 ```node
 // Please Note: Dinger does not provide UAT environment for credit cards 
 // MPU / Visa / Master 
@@ -54,7 +54,7 @@ const DingerMerchantPay = new DingerMerchantPayApi(
 ```
 
 
-#### 2. Creating Order
+#### 3. Creating Order
 ```node
 DingerMerchantPay
     .pay({
@@ -94,7 +94,7 @@ DingerMerchantPay
 | quantity  | string    | true          |  |
 
 
-#### 3. Handling Create Order Response 
+#### 4. Handling Create Order Response 
 
 * Please Note: that implementation of different method has different responses. 
 * QR, PIN, OTP, PWA are different .. 
@@ -149,7 +149,31 @@ res.json(flowResponse)
 * 2. Show QR code to scan on your application 
 * 3. Do nothing. just wait for notification from the payment provider application 
 
-#### 4. Front End Code
+#### 4. For Visa / Master / JCB 
+```node
+DingerMerchantPay
+    .queryCountryCode()
+    .then((response) => {
+        console.log(response)
+    })
+    .catch((error) => {
+        console.log(error)
+    })
+```
+
+#### 5. Check If Users Is Available
+```node
+DingerMerchantPay
+    .queryCheckPerson('092400000', 'UAB Pay')
+    .then((response) => {
+        console.log(response)
+    })
+    .catch((error) => {
+        console.log(error)
+    })
+```
+
+#### 7. Front End Code
 
 ```node
 // This code is for your front end

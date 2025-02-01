@@ -89,7 +89,34 @@ module.exports = class DingerPay {
         };
         return JSON.parse(await rp(reqOpts))
     }
-
+    /**
+     * queryCheckPerson
+     * @param {string} phoneNumber 
+     * @param {string} appName 
+     * @returns 
+     */
+    queryCheckPerson = async (phoneNumber, appName) => {
+        let reqOpts = {
+            method: 'GET',
+            uri: `${this.appBaseUrl}/api/checkPhone`,
+            qs: {
+                phoneNumber: phoneNumber,
+                appName: appName,
+            }
+        };
+        return JSON.parse(await rp(reqOpts))
+    }
+    /**
+     * queryCountryCode
+     * @returns 
+     */
+    queryCountryCode = async () => {
+        let reqOpts = {
+            method: 'GET',
+            uri: `${this.appBaseUrl}/api/countryCodeListEnquiry`,
+        };
+        return JSON.parse(await rp(reqOpts))
+    }
     /**
      * handleVendorResponse
      * @param {string} providerName 
@@ -137,7 +164,7 @@ module.exports = class DingerPay {
             redirectLink = null;
         }
         // AYA Pay App Push Notification
-        if (providerName === "AYA Pay" && methodName === "Pin") {
+        if (providerName === "AYA Pay" && methodName === "PIN") {
             flowOperation = "NOTIFICATION";
             redirectLink = null;
         }

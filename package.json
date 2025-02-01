@@ -1,10 +1,10 @@
 {
   "name": "dinger-merchant-pay-api",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Dinger Merchant Pay API",
   "main": "index.js",
   "scripts": {
-    "test": "npm run test"
+    "test": "mocha './test/*.js'"
   },
   "repository": {
     "type": "git",
@@ -12,9 +12,11 @@
   },
   "keywords": [
     "Dinger",
-    "Pay",
     "KBZPay",
-    "AYAPay"
+    "AYAPay",
+    "UAB",
+    "Visa",
+    "Master"
   ],
   "author": "Naw Ing",
   "license": "ISC",
@@ -23,6 +25,12 @@
   },
   "homepage": "https://github.com/nawing/Dinger-Merchant-Pay-API#readme",
   "dependencies": {
+    "aes-ecb": "^1.3.15",
+    "node-rsa": "^1.1.1",
     "request-promise": "^4.2.6"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "mocha": "^9.1.1"
   }
 }
