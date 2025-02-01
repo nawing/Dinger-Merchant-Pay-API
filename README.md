@@ -142,13 +142,13 @@ res.json(flowResponse)
 | 'NOTIFICATION'    |               | Do nothing |
 
 
-* To sum up there is 3 types of operations you need to implement on your front-end 
-* 1. Redirect to link
-* 2. Show QR code to scan on your application 
-* 3. Do nothing. just wait for notification from the payment provider application
+* To sum up there is 3 types of operations you need to implement on your front-end. 
+* Redirect to link
+* Show QR code to scan on your application 
+* Do nothing. just wait for notification from the payment provider application
 
 ```node
-// This code is for your front end
+// Front End Example
 // Hopefully this make sense
 import axios from 'axios';
 //const axios = require('axios'); // legacy way
@@ -184,18 +184,18 @@ axios
 #### 5. Query Contry Code [Visa / Master / JCB] 
 ```node
 let countryResponse = await DingerMerchantPay.queryCountryCode();
-
+// For Visa, Master & JCB, there are additional fields that needs to add
 let payResponse = await DingerMerchantPay
     .pay({
-        "providerName": "AYA Pay", 
-        "methodName": "QR", 
+        "providerName": "Visa", 
+        "methodName": "OTP", 
         "totalAmount" : 2200, 
         "orderId":  "11111", 
         "email": "info@gmail.com",
         "customerPhone" : "09787747310", 
         "customerName" : "test user name", 
         "state" : "customer state",
-        "country" : "customer country", ** Must add 'code' value from Country Code List Enquiry API(/countryCodeListEnquiry) from Dinger **
+        "country" : "customer country", // Must add 'code' value from Country Code List Enquiry API(/countryCodeListEnquiry) from Dinger **
         "postalCode" : "customer postal code",
         "billAddress" : "customer address",
         "billCity" : "customer city",
