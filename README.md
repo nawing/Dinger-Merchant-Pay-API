@@ -175,6 +175,8 @@ console.log(flowResponse)
 res.json(flowResponse)
 ```
 
+* This is the idea, to implement your payment flow very clean. 
+
 | flowOperation     | Key           | Description |
 | :---:             | :---:         |  :---: |
 | 'REDIRECT'        | redirectLink  | open the link on your UI |
