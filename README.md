@@ -20,7 +20,7 @@ const bodyParser = require("body-parser");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const DingerMerchantPayApi = require("dinger-merchant-pay");
+const DingerMerchantPayApi = require("dinger-merchant-pay-api");
 const DingerMerchantPay = new DingerMerchantPayApi(
     process.env.DINGER_PROJECT_NAME,
     process.env.DINGER_MERCHANT_NAME,
@@ -71,7 +71,7 @@ app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
 
 #### 1. Creating Instance
 ```node
-const DingerMerchantPayApi = require("dinger-merchant-pay");
+const DingerMerchantPayApi = require("dinger-merchant-pay-api");
 const DingerMerchantPay = new DingerMerchantPayApi(
     process.env.DINGER_PROJECT_NAME,
     process.env.DINGER_MERCHANT_NAME,
@@ -87,7 +87,7 @@ const DingerMerchantPay = new DingerMerchantPayApi(
 // Please Note: Dinger does not provide UAT environment for credit cards 
 // MPU / Visa / Master 
 // There is also no posible way to handle callback in UAT environment
-const DingerMerchantPayApi = require("dinger-merchant-pay");
+const DingerMerchantPayApi = require("dinger-merchant-pay-api");
 const DingerMerchantPay = new DingerMerchantPayApi(
   DINGER_PROJECT_NAME,
   DINGER_MERCHANT_NAME,
@@ -363,7 +363,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DingerMerchantPayApi = require("dinger-merchant-pay");
+const DingerMerchantPayApi = require("dinger-merchant-pay-api");
 const DingerMerchantPay = new DingerMerchantPayApi(
   DINGER_PROJECT_NAME,
   DINGER_MERCHANT_NAME,
