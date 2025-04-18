@@ -33,6 +33,17 @@ app.use(bodyParser.json());
 
 // Dinger Merchant API create order endpoint
 app.post("/dinger-create-order", async (req, res) => {
+    let payload = {
+        'providerName': req.body.providerName,
+        'methodName': req.body.methodName,
+        'totalAmount': req.body.totalAmount,
+        'orderId': req.body.orderId,
+        'customerPhone': req.body.customerPhone,
+        "customerName": req.body.customerName,
+        "description": req.body.description,
+        "customerAddress": req.body.customerAddress,
+        "items": req.body.items,
+    }
     let validationResponse = await DingerMerchantPay.validatePayload(payload);
     // Do your before hook here
     if (validationResponse.pass) {
