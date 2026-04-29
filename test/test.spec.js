@@ -1,4 +1,4 @@
-const DingerMerchantPayApi = require("..");
+const DingerMerchantPayApi = require("../dist/cjs");
 
 const baseURL = 'https://api.dinger.asia';
 const portalUrl = 'https://portal.dinger.asia/gateway';
